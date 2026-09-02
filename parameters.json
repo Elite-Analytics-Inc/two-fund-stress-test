@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "name": "two-fund-stress-test",
+    "description": "A $1M portfolio split between two funds (VTI and VXUS by default), compounded forward ten years under six market scenarios and every split from 0 to 100 — how the money grows or shrinks, whether the split matters, and what the bad years feel like.",
+    "owner": "analyst"
+  },
+  "lineage": {
+    "datasets": [
+      { "namespace": "portfolio", "table": "funds", "mode": "read" },
+      { "namespace": "portfolio", "table": "scenarios", "mode": "read" },
+      { "namespace": "portfolio", "table": "scenario_returns", "mode": "read" },
+      { "namespace": "portfolio", "table": "mixes", "mode": "read" }
+    ]
+  },
+  "parameters": {
+    "fund_a": {
+      "type": "string",
+      "description": "Ticker of the first fund — the one the split percentage refers to. Must have returns for every scenario.",
+      "placeholder": "VTI",
+      "required": true,
+      "default": "VTI"
+    },
+    "fund_b": {
+      "type": "string",
+      "description": "Ticker of the second fund — receives whatever share the first fund does not.",
+      "placeholder": "VXUS",
+      "required": true,
+      "default": "VXUS"
+    },
+    "starting_balance": {
+      "type": "number",
+      "description": "Dollars invested on day one. No money is added or taken out afterwards.",
+      "placeholder": "1000000",
+      "required": true,
+      "default": 1000000.0,
+      "minimum": 1.0
+    },
+    "start_year": {
+      "type": "integer",
+      "description": "The first forecast year. The dashboard labels calendar years from here.",
+      "placeholder": "2026",
+      "required": true,
+      "default": 2026,
+      "minimum": 2000,
+      "maximum": 2100
+    },
+    "horizon_years": {
+      "type": "integer",
+      "description": "How many years forward to project. The scenario data holds ten years.",
+      "placeholder": "10",
+      "required": true,
+      "default": 10,
+      "minimum": 1,
+      "maximum": 10
+    }
+  },
+  "resources": {
+    "cpu_request": "500m",
+    "cpu_limit": "2",
+    "memory_request": "1Gi",
+    "memory_limit": "1Gi",
+    "timeout_minutes": 10,
+    "pool": "standard"
+  }
+}
