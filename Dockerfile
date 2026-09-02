@@ -1,6 +1,6 @@
 # The build recipe. Generic: it packages whatever this repository's analysis is.
 # The base is public and carries the platform SDK and DuckDB, nothing else.
-ARG BASE_IMAGE=ghcr.io/subtractsoftware/tarn-job-base:0.8.14
+ARG BASE_IMAGE=ghcr.io/subtractsoftware/tarn-job-base:0.8.15
 FROM ${BASE_IMAGE}
 COPY main.py parameters.json /job/
 COPY dashboard/ /job/dashboard/
