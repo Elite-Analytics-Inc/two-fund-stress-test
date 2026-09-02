@@ -10,6 +10,8 @@ jobs:
       IMAGE: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
     steps:
       - uses: actions/checkout@v4
+      # A registry name must be lowercase; an organisation name like Elite-Analytics-Inc is not.
+      - run: echo "IMAGE=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
       # The base image is public: no secret, nothing to configure.
       - run: docker build -t "$IMAGE:${{ github.sha }}" .
       # Your own package is pushed with the repository's own token.
