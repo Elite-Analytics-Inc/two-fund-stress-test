@@ -63,8 +63,9 @@ SPLIT_STEP = 5
 PATHS = f"""
     -- Every split from 0 to 100 in fund A, in steps of {SPLIT_STEP}.
     splits AS (
-        SELECT (g * {SPLIT_STEP})::DOUBLE AS pct_fund_a
-        FROM range(0, (100 // {SPLIT_STEP}) + 1) t(g)
+        -- unnest(generate_series) rather than FROM range(): the platform's doors allow
+        -- scalar and aggregate functions only, never a function used as a table.
+        SELECT (unnest(generate_series(0, 100 // {SPLIT_STEP})) * {SPLIT_STEP})::DOUBLE AS pct_fund_a
     ),
     -- Each fund's yearly return in each scenario, as a fraction (0.12 for 12%).
     returns_a AS (
@@ -281,7 +282,9 @@ WITH wanted AS (
     SELECT s.scenario_id, s.name AS scenario_name, f.ticker, y.year_index
     FROM {CATALOG}.portfolio.scenarios s
     CROSS JOIN (SELECT '{FUND_A}' AS ticker UNION ALL SELECT '{FUND_B}') f
-    CROSS JOIN (SELECT range AS year_index FROM range(1, {HORIZON} + 1)) y
+    -- unnest(generate_series) rather than FROM range(): the platform's read door allows
+    -- scalar and aggregate functions only, never a function used as a table.
+    CROSS JOIN (SELECT unnest(generate_series(1, {HORIZON})) AS year_index) y
 ),
 present AS (
     SELECT scenario_id, upper(ticker) AS ticker, year AS year_index
