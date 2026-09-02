@@ -1,0 +1,32 @@
+# Builds the analysis into a package on every push to main, and prints the two lines the
+# analyst acts on. The image is named after the repository, so nothing here is edited.
+name: job image
+on: { push: { branches: [main] } }
+permissions: { contents: read, packages: write }
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+    steps:
+      - uses: actions/checkout@v4
+      # The base image is public: no secret, nothing to configure.
+      - run: docker build -t "$IMAGE:${{ github.sha }}" .
+      # Your own package is pushed with the repository's own token.
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - run: |
+          docker push "$IMAGE:${{ github.sha }}" | tee push.log
+          owner_kind=$([ "${{ github.event.repository.owner.type }}" = "Organization" ] && echo orgs || echo users)
+          SETTINGS="https://github.com/$owner_kind/${{ github.repository_owner }}/packages/container/${{ github.event.repository.name }}/settings"
+          REF="${{ github.event.repository.name }}@$(grep -o 'sha256:[0-9a-f]*' push.log | tail -1)"
+          echo
+          echo "MAKE PUBLIC (once) -> $SETTINGS"
+          echo "REGISTER THIS      -> $REF"
+          # The same two lines on the run's summary page, so they are the first thing seen.
+          {
+            echo "## Your package is built"
+            echo
+            echo "**Make it public, once:** $SETTINGS"
+            echo
+            echo "**Register this in Tarn:** \`$REF\`"
+          } >> "$GITHUB_STEP_SUMMARY"

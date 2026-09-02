@@ -1,0 +1,27 @@
+# The draft's environment, resolved by uv: the concierge runs `uv sync` at the tools gate and
+# `uv run tarn-draft run` to execute the analysis and open its dashboard. The analyst never
+# reads this file.
+#
+# `tarn` is the platform SDK *and* the dashboard previewer — the same package, the same
+# renderer, the same release the platform runs, which is what makes the preview honest and
+# promotion a package swap rather than a rewrite. teal and plume are the design system and
+# widget library the dashboard renders with, pinned by tag exactly as the platform pins them.
+[project]
+name = "tarn-draft-analysis"
+version = "0.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "tarn",
+    "teal",
+    "plume",
+    "duckdb>=1.1",
+]
+
+[tool.uv.sources]
+tarn = { git = "https://github.com/subtractsoftware/tarn.git" }
+teal = { git = "https://github.com/subtractsoftware/teal.git", tag = "v0.12.4" }
+plume = { git = "https://github.com/subtractsoftware/plume.git", tag = "v0.17.1" }
+
+# An analysis is a plain repo, not a package to build.
+[tool.uv]
+package = false
